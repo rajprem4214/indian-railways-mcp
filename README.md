@@ -8,6 +8,7 @@ The Indian Railways MCP Server provides live station status and train informatio
 
 - Fetch live station status
 - Retrieve train information
+- Get train details between stations
 
 ## Installation
 
@@ -48,11 +49,27 @@ The Indian Railways MCP Server provides live station status and train informatio
 - **Parameters:**
   - `stationCode`: The code of the station to get live status for.
 
+### Get Train Details Between Stations
+
+- **Endpoint:** `tools/call`
+- **Method:** `get-trains-between-stations`
+- **Parameters:**
+  - `from`: Source station code.
+  - `to`: Destination station code.
+
 ## Development
 
 - **Build:** `npm run build`
 - **Start:** `npm start`
 - **Test:** `npx ts-node src/testFunctions.ts`
+
+## Using with Claude
+
+To use this server with Claude, follow these steps:
+
+1. **Set Up Claude**: Ensure Claude is configured to interact with external APIs.
+2. **Connect to MCP Server**: Use Claude's API integration to connect to the MCP server.
+3. **Send Requests**: Use Claude to send requests to the server endpoints and process the responses.
 
 ## Contributing
 

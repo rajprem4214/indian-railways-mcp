@@ -1,8 +1,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { getStationLiveStatus, getTrainDetails } from "./railwayService.js";
-import { TrainInfo, LiveStationStatusResponse, TrainDetailsResponse } from "./railwayUtils.js";
+import { getStationLiveStatus, getTrainDetails, getTrainsBetweenStations } from "./railwayService.js";
+import { TrainInfo, LiveStationStatusResponse, TrainDetailsResponse, TrainsBetweenStationsResponse } from "./railwayUtils.js";
 
 // Create server instance
 const server = new McpServer({
@@ -80,8 +80,41 @@ server.tool(
                 }
             ]
         }
-    }
+    }   
 )       
+
+server.tool(
+    "get-trains-between-stations",
+    "Get trains between two stations",
+    {
+        from: z.string().describe("The starting station code"),
+        to: z.string().describe("The destination station code"),
+    },
+    async ({ from, to }) => {
+            const trainsBetweenStationsResponse = await getTrainsBetweenStations<TrainsBetweenStationsResponse>(from, to);
+
+        if (!trainsBetweenStationsResponse) {
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: `Error fetching trains between stations ${from} and ${to}`,
+                    }
+                ]
+            }
+        }       
+
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: `Trains between stations ${from} and ${to}: ${JSON.stringify(trainsBetweenStationsResponse)}`,
+                }
+            ]
+        }
+    }
+)
+
 
 async function main() {
     const transport = new StdioServerTransport();

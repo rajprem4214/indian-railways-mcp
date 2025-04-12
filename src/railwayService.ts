@@ -1,5 +1,4 @@
-import { parseLiveStationStatus, parseTrainData } from "./railwayUtils.js";
-
+import { parseLiveStationStatus, parseTrainData, parseBetweenStationsData } from "./railwayUtils.js";
 // Global URL constants
 const ERAIL_BASE_URL = "https://erail.in/rail/getTrains.aspx";
 const CONFIRMTKT_BASE_URL = "https://www.confirmtkt.com/pnr-status";
@@ -29,5 +28,19 @@ export async function getStationLiveStatus<T>(code: string): Promise<T | null> {
       return json as T;
     } catch (e: any) {
       throw new Error(e.message);
+    }
+  }
+  
+
+  export async function getTrainsBetweenStations<T>(from: string, to: string): Promise<T | null> {
+    const URL_Trains = `https://erail.in/rail/getTrains.aspx?Station_From=${from}&Station_To=${to}&DataSource=0&Language=0&Cache=true`;
+    try {
+      const response = await fetch(URL_Trains);
+      const data = await response.text();
+      const json = parseBetweenStationsData(data); // Implement this function to parse the response
+      return json as T;
+    } catch (error: any) {
+      console.log(error.message);
+      throw new Error("Failed to fetch trains between stations");
     }
   }

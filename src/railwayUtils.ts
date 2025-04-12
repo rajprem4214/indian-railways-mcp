@@ -32,6 +32,11 @@ export interface TrainDetailsResponse {
   averageSpeed: string; 
 }
 
+export interface TrainsBetweenStationsResponse {
+  success: boolean;
+  time_stamp: number;
+  data: TrainDetailsResponse[];
+}
 
 // Function to parse live station status
 export function parseLiveStationStatus(html: string): LiveStationStatusResponse {
@@ -98,6 +103,71 @@ export function parseTrainData(rawData: string): TrainDetailsResponse | { succes
     trainInfo["averageSpeed"] = secondaryData[19];
 
     return trainInfo as TrainDetailsResponse;
+  } catch (err: any) {
+    console.warn(err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+// Function to parse data for trains between stations
+export function parseBetweenStationsData(rawData: string): TrainsBetweenStationsResponse | { success: boolean; error?: string; data?: any } {
+  try {
+    let trainInfo: any = {};
+    let result: any = {};
+    let trainList: any[] = [];
+    let trainDetails: any = {};
+    let sections = rawData.split("~~~~~~~~");
+    let noRoute = sections[0].split("~");
+    noRoute = noRoute[5].split("<");
+
+    if (noRoute[0] === "No direct trains found") {
+      result["success"] = false;
+      result["time_stamp"] = Date.now();
+      result["data"] = noRoute[0];
+      return result;
+    }
+
+    if (
+      sections[0] === "~~~~~Please try again after some time." ||
+      sections[0] === "~~~~~From station not found" ||
+      sections[0] === "~~~~~To station not found"
+    ) {
+      result["success"] = false;
+      result["time_stamp"] = Date.now();
+      result["data"] = sections[0].replaceAll("~", "");
+      return result;
+    }
+
+    sections = sections.filter((el) => el !== "");
+    for (let i = 0; i < sections.length; i++) {
+      let trainData = sections[i].split("~^");
+      if (trainData.length === 2) {
+        trainData = trainData[1].split("~").filter((el) => el !== "");
+        trainInfo["trainNumber"] = trainData[0];
+        trainInfo["trainName"] = trainData[1];
+        trainInfo["sourceStationName"] = trainData[2];
+        trainInfo["sourceStationCode"] = trainData[3];
+        trainInfo["destinationStationName"] = trainData[4];
+        trainInfo["destinationStationCode"] = trainData[5];
+        trainInfo["fromStationName"] = trainData[6];
+        trainInfo["fromStationCode"] = trainData[7];
+        trainInfo["toStationName"] = trainData[8];
+        trainInfo["toStationCode"] = trainData[9];
+        trainInfo["departureTime"] = trainData[10];
+        trainInfo["arrivalTime"] = trainData[11];
+        trainInfo["travelDuration"] = trainData[12];
+        trainInfo["operatingDays"] = trainData[13];
+        trainDetails["trainBase"] = trainInfo;
+        trainList.push(trainDetails);
+        trainInfo = {};
+        trainDetails = {};
+      }
+    }
+
+    result["success"] = true;
+    result["time_stamp"] = Date.now();
+    result["data"] = trainList;
+    return result;
   } catch (err: any) {
     console.warn(err.message);
     return { success: false, error: err.message };
