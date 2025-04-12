@@ -37,7 +37,7 @@ The Indian Railways MCP Server provides live station status and train informatio
 
 3. **Test the functions:**
    ```bash
-   npx ts-node src/testFunctions.ts
+   node --loader ts-node/esm src/testFunctions.ts
    ```
 
 ## API
