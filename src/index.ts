@@ -1,8 +1,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { getStationLiveStatus } from "./railwayService.js";
-import { TrainInfo, LiveStationStatusResponse } from "./railwayUtils.js";
+import { getStationLiveStatus, getTrainDetails } from "./railwayService.js";
+import { TrainInfo, LiveStationStatusResponse, TrainDetailsResponse } from "./railwayUtils.js";
 
 // Create server instance
 const server = new McpServer({
@@ -51,6 +51,37 @@ server.tool(
     }
    }
 )
+
+server.tool(
+    "get-train-details",
+    "Get train details by train number",
+    {
+        trainNumber: z.string().describe("The train number to get details for"),
+    },
+    async ({ trainNumber }) => {
+        const trainDetailsResponse = await getTrainDetails<TrainDetailsResponse>(trainNumber);
+
+        if (!trainDetailsResponse) {
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: `Error fetching train details for ${trainNumber}`,
+                    }
+                ]
+            }
+        }
+
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: `Train details for ${trainNumber}: ${JSON.stringify(trainDetailsResponse)}`,  
+                }
+            ]
+        }
+    }
+)       
 
 async function main() {
     const transport = new StdioServerTransport();
