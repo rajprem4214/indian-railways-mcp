@@ -1,0 +1,39 @@
+{
+  "name": "indian-railways-mcp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "indian-railways-mcp": "./build/index.js"
+  },
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "ESNext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.9.0",
+    "jsdom": "^26.0.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^22.14.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
