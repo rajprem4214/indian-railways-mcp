@@ -38,6 +38,34 @@ export interface TrainsBetweenStationsResponse {
   data: TrainDetailsResponse[];
 }
 
+export interface TrainRoute {
+  sourceStationName: string;
+  sourceStationCode: string;
+  arrivalTime: string;
+  departureTime: string;
+  distance: string; 
+  day: string;
+  zone: string;
+} 
+
+export interface TrainRouteResponse {
+  success: boolean;
+  time_stamp: number;
+  data: TrainRoute[];
+}
+
+export interface TrainsOnDateResponse {
+  success: boolean;
+  time_stamp: number;
+  data: TrainInfo[];
+}
+
+export interface PnrStatusResponse {
+  success: boolean;
+  time_stamp: number;
+  data: any;
+}
+
 // Function to parse live station status
 export function parseLiveStationStatus(html: string): LiveStationStatusResponse {
   const dom = new JSDOM(html);
@@ -174,4 +202,56 @@ export function parseBetweenStationsData(rawData: string): TrainsBetweenStations
   }
 }
 
-// Additional utility functions can be added here for other types of responses. 
+export function parseRouteData(rawData: string): TrainRouteResponse | { success: boolean; error?: string; data?: any } {
+  try {
+    let data = rawData.split("~^");
+    let routeList: any[] = [];
+    let stationInfo: any = {};
+    let result: any = {};
+
+    for (let i = 0; i < data.length; i++) {
+      let stationData = data[i].split("~").filter((el) => el !== "");
+      stationInfo["sourceStationName"] = stationData[2];
+      stationInfo["sourceStationCode"] = stationData[1];
+      stationInfo["arrivalTime"] = stationData[3];
+      stationInfo["departureTime"] = stationData[4];
+      stationInfo["distance"] = stationData[6];
+      stationInfo["day"] = stationData[7];
+      stationInfo["zone"] = stationData[9];
+      routeList.push(stationInfo);
+      stationInfo = {};
+    }
+
+    result["success"] = true;
+    result["time_stamp"] = Date.now();
+    result["data"] = routeList;
+    return result;
+  } catch (err: any) {
+    console.warn(err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+
+export function parsePnrStatus(rawData: string): PnrStatusResponse | { success: boolean; error?: string; data?: any } {
+  try {
+    let retval: any = {};
+    const pattern = /data\s*=\s*({.*?;)/;
+    const match = rawData.match(pattern);
+
+    if (!match) {
+      throw new Error("PNR data not found");
+    }
+
+    const dataString = match[0].slice(7, -1);
+    const data = JSON.parse(dataString);
+
+    retval["success"] = true;
+    retval["time_stamp"] = Date.now();
+    retval["data"] = data;
+    return retval;
+  } catch (err: any) {
+    console.warn(err.message);
+    return { success: false, error: err.message };
+  }
+}

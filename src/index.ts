@@ -1,8 +1,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { getStationLiveStatus, getTrainDetails, getTrainsBetweenStations } from "./railwayService.js";
-import { TrainInfo, LiveStationStatusResponse, TrainDetailsResponse, TrainsBetweenStationsResponse } from "./railwayUtils.js";
+import { getStationLiveStatus, getTrainDetails, getTrainsBetweenStations, getTrainRoute, getTrainsOnDate, getPnrStatus } from "./railwayService.js";
+import { TrainInfo, LiveStationStatusResponse, TrainDetailsResponse, TrainsBetweenStationsResponse, TrainRouteResponse, TrainsOnDateResponse, PnrStatusResponse } from "./railwayUtils.js";
 
 // Create server instance
 const server = new McpServer({
@@ -115,6 +115,100 @@ server.tool(
     }
 )
 
+server.tool(
+    "get-train-route",
+    "Get train route by train number",
+    {
+        trainNumber: z.string().describe("The train number to get route for"),
+    },
+    async ({ trainNumber }) => {
+        const trainRouteResponse = await getTrainRoute<TrainRouteResponse>(trainNumber);
+
+        if (!trainRouteResponse) {
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: `Error fetching train route for ${trainNumber}`,
+                    }
+                ]
+            }
+        }
+
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: `Train route for ${trainNumber}: ${JSON.stringify(trainRouteResponse)}`,
+                }
+            ]
+        }   
+    }   
+)
+
+server.tool(
+    "get-trains-on-date",
+    "Get trains between two stations on a specific date",
+    {
+        from: z.string().describe("The starting station code"), 
+        to: z.string().describe("The destination station code"),
+        date: z.string().describe("The date to get trains for"),
+    },
+    async ({ from, to, date }) => {
+        const trainsOnDateResponse = await getTrainsOnDate<TrainsOnDateResponse>(from, to, date);
+
+        if (!trainsOnDateResponse) {
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: `Error fetching trains on date ${date} between stations ${from} and ${to}`,
+                    }
+                ]
+            }
+        }   
+
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: `Trains on date ${date} between stations ${from} and ${to}: ${JSON.stringify(trainsOnDateResponse)}`,
+                }
+            ]
+        }   
+    }
+)   
+
+server.tool(
+    "get-pnr-status",
+    "Get PNR status by PNR number",
+    {
+        pnrNumber: z.string().describe("The PNR number to get status for"),
+    },  
+    async ({ pnrNumber }) => {
+            const pnrStatusResponse = await getPnrStatus<PnrStatusResponse>(pnrNumber);
+
+        if (!pnrStatusResponse) {
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: `Error fetching PNR status for ${pnrNumber}`,
+                    }
+                ]
+            }
+        }
+
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: `PNR status for ${pnrNumber}: ${JSON.stringify(pnrStatusResponse)}`,
+                }
+            ]
+        }
+    }       
+)
 
 async function main() {
     const transport = new StdioServerTransport();
