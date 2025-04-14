@@ -13,6 +13,11 @@ The Indian Railways MCP Server provides live station status and train informatio
 - Retrieve train route information
 - Check PNR status
 
+## Demo
+https://github.com/user-attachments/assets/3f751174-cb0e-43b0-86a5-5493ab3da1e5
+
+
+
 ## Installation
 
 1. **Clone the repository:**
