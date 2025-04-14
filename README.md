@@ -9,6 +9,9 @@ The Indian Railways MCP Server provides live station status and train informatio
 - Fetch live station status
 - Retrieve train information
 - Get train details between stations
+- Get train details on a specific date
+- Retrieve train route information
+- Check PNR status
 
 ## Installation
 
@@ -57,6 +60,74 @@ The Indian Railways MCP Server provides live station status and train informatio
   - `from`: Source station code.
   - `to`: Destination station code.
 
+### Get Train Details on a Specific Date
+
+- **Endpoint:** `tools/call`
+- **Method:** `get-trains-on-date`
+- **Parameters:**
+  - `from`: Source station code.
+  - `to`: Destination station code.
+  - `date`: Date in `YYYY-MM-DD` format.
+
+### Retrieve Train Route Information
+
+- **Endpoint:** `tools/call`
+- **Method:** `get-train-route`
+- **Parameters:**
+  - `trainNo`: Train number.
+
+### Check PNR Status
+
+- **Endpoint:** `tools/call`
+- **Method:** `get-pnr-status`
+- **Parameters:**
+  - `pnr`: PNR number.
+
+## Sample Queries
+
+Here are some example queries you can use with the API:
+
+- **Get live railway station status for NDLS:**
+  ```json
+  {
+    "method": "get-station-live-status",
+    "params": {
+      "stationCode": "NDLS"
+    }
+  }
+  ```
+
+- **Get all details of train number 12059:**
+  ```json
+  {
+    "method": "get-train-details",
+    "params": {
+      "trainNo": "12059"
+    }
+  }
+  ```
+
+- **Fetch complete route of train number 12059:**
+  ```json
+  {
+    "method": "get-train-route",
+    "params": {
+      "trainNo": "12059"
+    }
+  }
+  ```
+
+- **Get all trains running between GODA and NDLS:**
+  ```json
+  {
+    "method": "get-trains-between-stations",
+    "params": {
+      "from": "GODA",
+      "to": "NDLS"
+    }
+  }
+  ```
+
 ## Development
 
 - **Build:** `npm run build`
@@ -65,11 +136,28 @@ The Indian Railways MCP Server provides live station status and train informatio
 
 ## Using with Claude
 
-To use this server with Claude, follow these steps:
+To integrate this server with Claude, follow these steps:
 
-1. **Set Up Claude**: Ensure Claude is configured to interact with external APIs.
-2. **Connect to MCP Server**: Use Claude's API integration to connect to the MCP server.
-3. **Send Requests**: Use Claude to send requests to the server endpoints and process the responses.
+1. **Configure Claude Desktop**: Add the following configuration to your Claude Desktop config file:
+
+   - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+   ```json
+   {
+     "mcpServers": {
+       "indian-railways-mcp": {
+         "command": "node",
+         "args": [
+           "F:\\railways-mcp\\indian-railways-mcp\\build\\index.js"
+         ]
+       }
+     }
+   }
+   ```
+
+2. **Restart Claude Desktop**: After updating the configuration file, restart Claude Desktop to apply the changes.
+
+This setup will allow Claude to connect to the Indian Railways MCP Server and handle requests seamlessly.
 
 ## Contributing
 
